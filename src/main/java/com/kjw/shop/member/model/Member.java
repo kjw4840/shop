@@ -6,7 +6,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,7 +44,7 @@ public class Member implements UserDetails {
             joinColumns = @JoinColumn(name = "MEMBER_ID"),
             inverseJoinColumns = @JoinColumn(name = "ROLE_ID")
     )
-    private List<Role> roles = new ArrayList<>();
+    private List<Role> roles;
 
 //    @Override
 //    public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -1,11 +1,16 @@
 package com.kjw.shop.member.controller;
 
-import com.kjw.shop.config.jwt.JwtTokenProvider;
+import com.kjw.shop.common.ResponseService;
+import com.kjw.shop.common.SingleResult;
+import com.kjw.shop.config.jwt.model.TokenDto;
+import com.kjw.shop.config.jwt.model.TokenRequestDto;
 import com.kjw.shop.member.model.Member;
 import com.kjw.shop.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author jinwook.kim
@@ -18,9 +23,8 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
 
-    private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
     private final MemberService memberService;
+    private final ResponseService responseService;
 
     // 회원가입
     @PostMapping("/join")
@@ -29,9 +33,13 @@ public class MemberController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody Member member) {
-        return memberService.login(member);
+    public SingleResult<TokenDto> login(@RequestBody Member member) {
+        TokenDto token = memberService.login(member);
+        return responseService.getSingleResult(token);
     }
 
-
+    @PostMapping("/reissue")
+    public SingleResult<TokenDto> reissue(@RequestBody TokenRequestDto tokenRequestDto) {
+        return responseService.getSingleResult(memberService.reissue(tokenRequestDto));
+    }
 }

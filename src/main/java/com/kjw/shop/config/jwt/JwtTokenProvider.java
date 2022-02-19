@@ -1,10 +1,8 @@
 package com.kjw.shop.config.jwt;
 
+import com.kjw.shop.config.jwt.model.TokenDto;
 import com.kjw.shop.member.model.Role;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,9 +26,11 @@ public class JwtTokenProvider {
     private String secretKey = "webfirewood";
 
     // 토큰 유효시간 30분
-    private long tokenValidTime = 30 * 60 * 1000L;
+    private long tokenValidTime = 1 * 60 * 1000L;
+    private long refreshTokenValidTime = 3 * 60 * 1000L;
 
     private final UserDetailsService userDetailsService;
+//    private final RedisService redisService;
 
     // 객체 초기화, secretKey를 Base64로 인코딩한다.
     @PostConstruct
@@ -39,25 +39,50 @@ public class JwtTokenProvider {
     }
 
     // JWT 토큰 생성
-    public String createToken(String userPk, List<Role> roles) {
+    public TokenDto createToken(String userPk, List<Role> roles) {
         Claims claims = Jwts.claims().setSubject(userPk); // JWT payload 에 저장되는 정보단위
         claims.put("roles", roles); // 정보는 key / value 쌍으로 저장된다.
         Date now = new Date();
-        return Jwts.builder()
+        String accessToken = Jwts.builder()
                 .setClaims(claims) // 정보 저장
                 .setIssuedAt(now) // 토큰 발행 시간 정보
                 .setExpiration(new Date(now.getTime() + tokenValidTime)) // set Expire Time
                 .signWith(SignatureAlgorithm.HS256, secretKey)  // 사용할 암호화 알고리즘과
                 // signature 에 들어갈 secret값 세팅
                 .compact();
+
+        String refreshToken = Jwts.builder()
+                .setExpiration(new Date(now.getTime() + refreshTokenValidTime))
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact();
+        return TokenDto.builder()
+                .type("bearer")
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .accessTokenExpireDate(tokenValidTime)
+                .build();
     }
 
     // JWT 토큰에서 인증 정보 조회
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserPk(token));
+        Claims claims = parseClaims(token);
+        String subject = claims.getSubject();
+
+
+//        UserDetails userDetails = userDetailsService.loadUserByUsername(claims.getSubject());
+//        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(subject);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
-
+    // Jwt 토큰 복호화해서 가져오기
+    private Claims parseClaims(String token) {
+        try {
+            return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        }
+    }
     // 토큰에서 회원 정보 추출
     public String getUserPk(String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
@@ -77,4 +102,8 @@ public class JwtTokenProvider {
             return false;
         }
     }
+//    public boolean existsRefreshToken(String refreshToken) {
+//        String key = String.format("LOGIN::MEMBER::%s", refreshToken);
+//        return redisService.getValue(key) != null;
+//    }
 }
