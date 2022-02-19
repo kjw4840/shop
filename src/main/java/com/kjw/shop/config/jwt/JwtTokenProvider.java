@@ -25,9 +25,9 @@ import java.util.List;
 public class JwtTokenProvider {
     private String secretKey = "webfirewood";
 
-    // 토큰 유효시간 30분
-    private long tokenValidTime = 1 * 60 * 1000L;
-    private long refreshTokenValidTime = 3 * 60 * 1000L;
+    // 토큰 유효시간 10분
+    private long tokenValidTime = 10 * 60 * 1000L;
+    private long refreshTokenValidTime = 30 * 60 * 1000L;
 
     private final UserDetailsService userDetailsService;
 //    private final RedisService redisService;
@@ -102,8 +102,4 @@ public class JwtTokenProvider {
             return false;
         }
     }
-//    public boolean existsRefreshToken(String refreshToken) {
-//        String key = String.format("LOGIN::MEMBER::%s", refreshToken);
-//        return redisService.getValue(key) != null;
-//    }
 }
