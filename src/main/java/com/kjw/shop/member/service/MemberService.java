@@ -2,6 +2,7 @@ package com.kjw.shop.member.service;
 
 import com.kjw.shop.config.jwt.model.TokenDto;
 import com.kjw.shop.config.jwt.model.TokenRequestDto;
+import com.kjw.shop.member.dto.MemberJoinDto;
 import com.kjw.shop.member.model.Member;
 
 /**
@@ -9,9 +10,11 @@ import com.kjw.shop.member.model.Member;
  * @since 2022/01/29
  */
 public interface MemberService {
-    Long join(Member member);
+    Long join(MemberJoinDto member);
 
     TokenDto login(Member member);
 
     TokenDto reissue(TokenRequestDto tokenRequestDto);
+
+
 }

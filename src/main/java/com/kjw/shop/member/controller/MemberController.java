@@ -4,6 +4,7 @@ import com.kjw.shop.common.ResponseService;
 import com.kjw.shop.common.SingleResult;
 import com.kjw.shop.config.jwt.model.TokenDto;
 import com.kjw.shop.config.jwt.model.TokenRequestDto;
+import com.kjw.shop.member.dto.MemberJoinDto;
 import com.kjw.shop.member.model.Member;
 import com.kjw.shop.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class MemberController {
 
     // 회원가입
     @PostMapping("/join")
-    public Long join(@RequestBody Member member) {
+    public Long join(@RequestBody MemberJoinDto member) {
         return memberService.join(member);
     }
 

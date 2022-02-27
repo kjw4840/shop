@@ -4,6 +4,8 @@ import com.kjw.shop.config.jwt.JwtTokenProvider;
 import com.kjw.shop.config.jwt.model.TokenDto;
 import com.kjw.shop.config.jwt.model.TokenRequestDto;
 import com.kjw.shop.config.redis.service.RedisService;
+import com.kjw.shop.member.dto.MemberJoinDto;
+import com.kjw.shop.member.mapper.MemberMapper;
 import com.kjw.shop.member.model.Authority;
 import com.kjw.shop.member.model.Member;
 import com.kjw.shop.member.model.Role;
@@ -33,16 +35,13 @@ public class MemberServiceImpl implements MemberService {
     private final RedisService redisService;
 
     @Override
-    public Long join(Member member) {
+    public Long join(MemberJoinDto member) {
         Role role = roleRepository.findByName(Authority.ADMIN).orElseThrow(() -> new IllegalArgumentException("not found Roll"));
 
-        Member buildMember = Member.builder()
-                .email(member.getEmail())
-                .password(passwordEncoder.encode(member.getPassword()))
-                .roles(Collections.singletonList(role))
-                .build();
+        Member memberEntity = MemberMapper.INSTANCE.toEntity(member);
+        memberEntity.setRoles(Collections.singletonList(role));
 
-        return memberRepository.save(buildMember).getId();
+        return memberRepository.save(memberEntity).getId();
     }
 
     @Override
