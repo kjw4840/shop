@@ -1,5 +1,7 @@
 package com.kjw.shop.member.service.impl;
 
+import com.kjw.shop.common.exception.CustomException;
+import com.kjw.shop.common.exception.HttpErrorType;
 import com.kjw.shop.config.jwt.JwtTokenProvider;
 import com.kjw.shop.config.jwt.model.TokenDto;
 import com.kjw.shop.config.jwt.model.TokenRequestDto;
@@ -18,13 +20,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
+import java.util.Optional;
 
 /**
  * @author jinwook.kim
  * @since 2022/01/29
  */
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
 
@@ -36,10 +39,15 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Long join(MemberJoinDto member) {
+        Optional<Member> find = memberRepository.findByEmail(member.getEmail());
+
+        if (find.isPresent()) {
+            throw new CustomException(HttpErrorType.ALREADY_EXISTS);
+        }
+
         Role role = roleRepository.findByName(Authority.ADMIN).orElseThrow(() -> new IllegalArgumentException("not found Roll"));
 
-        Member memberEntity = MemberMapper.INSTANCE.toEntity(member);
-        memberEntity.setRoles(Collections.singletonList(role));
+        Member memberEntity = MemberMapper.INSTANCE.toEntity(member, role);
 
         return memberRepository.save(memberEntity).getId();
     }
