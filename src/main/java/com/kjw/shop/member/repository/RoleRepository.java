@@ -10,6 +10,6 @@ import java.util.Optional;
  * @author jinwook.kim
  * @since 2022/01/29
  */
-public interface RoleRepository extends JpaRepository<Role, Long> {
+public interface RoleRepository extends JpaRepository<Role, Long> , RoleCustomRepository{
     Optional<Role> findByName(Authority authority);
 }

@@ -9,7 +9,9 @@ import lombok.Getter;
 @Getter
 public enum HttpErrorType {
 
-    ALREADY_EXISTS(400, "이미 존재하는 회원입니다.");
+    ALREADY_EXISTS(400, "이미 존재하는 회원입니다."),
+    PERMISSION_DENY(400, "권한이 없습니다.");
+
 
     private int errorCode;
     private String errorMsg;

@@ -45,7 +45,7 @@ public class MemberServiceImpl implements MemberService {
             throw new CustomException(HttpErrorType.ALREADY_EXISTS);
         }
 
-        Role role = roleRepository.findByName(Authority.ADMIN).orElseThrow(() -> new IllegalArgumentException("not found Roll"));
+        Role role = roleRepository.findByName(Authority.USER).orElseThrow(() -> new IllegalArgumentException("not found Roll"));
 
         Member memberEntity = MemberMapper.INSTANCE.toEntity(member, role);
 
@@ -62,7 +62,7 @@ public class MemberServiceImpl implements MemberService {
             throw new IllegalArgumentException("잘못된 비밀번호입니다.");
         }
 
-        TokenDto token = jwtTokenProvider.createToken(member.getEmail(), member.getRoles());
+        TokenDto token = jwtTokenProvider.createToken(findMember.getId(), findMember.getRoles());
 
         redisService.put(token.getRefreshToken(), findMember);
 
@@ -93,7 +93,7 @@ public class MemberServiceImpl implements MemberService {
         }
 
 
-        TokenDto token = jwtTokenProvider.createToken(findMember.getEmail(), findMember.getRoles());
+        TokenDto token = jwtTokenProvider.createToken(findMember.getId(), findMember.getRoles());
         redisService.put(token.getRefreshToken(), findMember);
         return token;
     }
